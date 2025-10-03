@@ -12,8 +12,30 @@ vi.mock('../config/env', () => ({
   },
 }));
 
-// Mock Supabase client
+// Mock Supabase client for modules importing via different specifiers
 vi.mock('../config/supabase', () => ({
+  supabase: {
+    rpc: vi.fn(),
+    from: vi.fn(() => ({
+      select: vi.fn(),
+      insert: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+    })),
+  },
+}));
+vi.mock('../../config/supabase', () => ({
+  supabase: {
+    rpc: vi.fn(),
+    from: vi.fn(() => ({
+      select: vi.fn(),
+      insert: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+    })),
+  },
+}));
+vi.mock('@/config/supabase', () => ({
   supabase: {
     rpc: vi.fn(),
     from: vi.fn(() => ({

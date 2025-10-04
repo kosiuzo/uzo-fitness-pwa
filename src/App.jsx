@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AppLayout } from './components/layout'
 import { NetworkStatusBanner } from './components/shared'
 import { DashboardPage } from './pages/DashboardPage'
+import { WorkoutsPage } from './pages/WorkoutsPage'
 
 // Create query client for TanStack Query
 const queryClient = new QueryClient({
@@ -16,15 +17,6 @@ const queryClient = new QueryClient({
 })
 
 // Placeholder page components - will be implemented in future phases
-function WorkoutsPage() {
-  return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Workouts</h1>
-      <p className="text-gray-600">Workout library coming soon</p>
-    </div>
-  )
-}
-
 function ExercisesPage() {
   return (
     <div className="p-4">

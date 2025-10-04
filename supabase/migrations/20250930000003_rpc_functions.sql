@@ -233,6 +233,50 @@ from grp g;
 $$;
 
 -- =========================================
+-- Workout list JSON: for workout library view
+-- =========================================
+create or replace function workout_list_json()
+returns jsonb
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select coalesce(
+    jsonb_agg(
+      jsonb_build_object(
+        'id', w.id,
+        'name', w.name,
+        'description', w.notes,
+        'groups', (
+          select coalesce(jsonb_agg(
+            jsonb_build_object(
+              'id', wg.id,
+              'exercise_count', (
+                select count(*)
+                from workout_items wi
+                where wi.group_id = wg.id
+              )
+            ) order by wg.position
+          ), '[]'::jsonb)
+          from workout_groups wg
+          where wg.workout_id = w.id
+        ),
+        'last_session_date', (
+          select max(s.date)
+          from sessions s
+          where s.workout_id = w.id and s.duration_seconds is not null
+        ),
+        'created_at', w.created_at
+      ) order by w.created_at desc
+    ),
+    '[]'::jsonb
+  )
+  from workouts w
+  where w.user_id = auth.uid();
+$$;
+
+-- =========================================
 -- Views (handy for dashboards/history)
 -- =========================================
 create or replace view v_cycle_progress as

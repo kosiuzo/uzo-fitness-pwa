@@ -18,6 +18,7 @@ import type {
   UpdateWorkoutParams,
   AddWorkoutGroupParams,
   ReorderWorkoutGroupsParams,
+  ReorderWorkoutItemsParams,
   AddWorkoutItemParams,
 } from '../types/rpc';
 
@@ -362,6 +363,141 @@ export function useReorderWorkoutGroups(
     onSettled: (data, error, variables, context) => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.workouts.detail(variables.p_workout_id),
+      });
+
+      options?.onSettled?.(data, error, variables, context);
+    },
+    ...options,
+  });
+}
+
+/**
+ * Reorder workout items within or across groups
+ *
+ * **Invalidates**: workouts.detail(workoutId)
+ * **Optimistic Update**: Yes for responsive drag-and-drop UX
+ */
+export function useReorderWorkoutItems(
+  options?: UseMutationOptions<
+    void,
+    rpc.RPCError,
+    ReorderWorkoutItemsParams & { workoutId: string }
+  >
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ workoutId, ...params }) =>
+      rpc.reorderWorkoutItems(params),
+    onMutate: async (variables) => {
+      const queryKey = queryKeys.workouts.detail(variables.workoutId);
+
+      await queryClient.cancelQueries({ queryKey });
+
+      const previousWorkout = queryClient.getQueryData<WorkoutDetailResponse>(queryKey);
+
+      if (previousWorkout) {
+        queryClient.setQueryData<WorkoutDetailResponse>(queryKey, (old) => {
+          if (!old) return old;
+
+          const movedItemId = variables.p_moved_item_id;
+          const targetGroupId = variables.p_workout_group_id;
+          const beforeItemId = variables.p_before_item_id ?? null;
+
+          const sourceGroupIndex = old.groups.findIndex((group) =>
+            group.items.some((item) => item.id === movedItemId)
+          );
+          const targetGroupIndex = old.groups.findIndex(
+            (group) => group.id === targetGroupId
+          );
+
+          if (sourceGroupIndex === -1 || targetGroupIndex === -1) {
+            return old;
+          }
+
+          const sourceGroup = old.groups[sourceGroupIndex];
+          const targetGroup = old.groups[targetGroupIndex];
+
+          const movedItem = sourceGroup.items.find((item) => item.id === movedItemId);
+
+          if (!movedItem) {
+            return old;
+          }
+
+          const removeItem = (items: typeof sourceGroup.items) =>
+            items.filter((item) => item.id !== movedItemId);
+
+          const insertItem = (
+            items: typeof sourceGroup.items,
+            itemToInsert: typeof movedItem,
+            beforeId: string | null
+          ) => {
+            const working = [...items];
+            const insertIndex = beforeId
+              ? working.findIndex((item) => item.id === beforeId)
+              : working.length;
+            const validIndex = insertIndex >= 0 ? insertIndex : working.length;
+            working.splice(validIndex, 0, itemToInsert);
+            return working;
+          };
+
+          const updatedGroups = old.groups.map((group) => {
+            if (group.id === sourceGroup.id && group.id === targetGroup.id) {
+              const withoutMoved = removeItem(group.items);
+              const withInserted = insertItem(withoutMoved, movedItem, beforeItemId);
+              return { ...group, items: withInserted };
+            }
+
+            if (group.id === sourceGroup.id) {
+              return { ...group, items: removeItem(group.items) };
+            }
+
+            if (group.id === targetGroup.id) {
+              // Ensure item not duplicated if already in target list
+              const withoutMoved = removeItem(group.items);
+              const withInserted = insertItem(withoutMoved, movedItem, beforeItemId);
+              return { ...group, items: withInserted };
+            }
+
+            return group;
+          });
+
+          const groupsWithPositions = updatedGroups.map((group) => {
+            const groupLetter = String.fromCharCode(64 + group.position);
+            const itemsWithPositions = group.items.map((item, index) => ({
+              ...item,
+              position: index + 1,
+              groupPosition: `${groupLetter}${index + 1}`,
+            }));
+
+            return {
+              ...group,
+              items: itemsWithPositions,
+            };
+          });
+
+          return {
+            ...old,
+            groups: groupsWithPositions,
+          };
+        });
+      }
+
+      return { previousWorkout };
+    },
+    onError: (error, variables, context) => {
+      if (context?.previousWorkout) {
+        queryClient.setQueryData(
+          queryKeys.workouts.detail(variables.workoutId),
+          context.previousWorkout
+        );
+      }
+
+      options?.onError?.(error, variables, context);
+    },
+    onSettled: (data, error, variables, context) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.workouts.detail(variables.workoutId),
       });
 
       options?.onSettled?.(data, error, variables, context);

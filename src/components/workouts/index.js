@@ -4,3 +4,4 @@
  */
 
 export { WorkoutCard } from './WorkoutCard';
+export { WorkoutEditor } from './WorkoutEditor';

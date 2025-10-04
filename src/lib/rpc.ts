@@ -23,6 +23,7 @@ import type {
   UpdateWorkoutParams,
   AddWorkoutGroupParams,
   ReorderWorkoutGroupsParams,
+  ReorderWorkoutItemsParams,
   AddWorkoutItemParams,
   StartSessionParams,
   LogSetParams,
@@ -196,6 +197,16 @@ export async function reorderWorkoutGroups(
   params: ReorderWorkoutGroupsParams
 ): Promise<void> {
   await callRPC<void>('reorder_workout_groups', params);
+}
+
+/**
+ * Reorder workout items within or across groups
+ * @param params.p_before_item_id - Item to insert before (null = move to end)
+ */
+export async function reorderWorkoutItems(
+  params: ReorderWorkoutItemsParams
+): Promise<void> {
+  await callRPC<void>('reorder_workout_items', params);
 }
 
 /**

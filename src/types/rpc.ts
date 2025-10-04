@@ -213,6 +213,12 @@ export interface ReorderWorkoutGroupsParams {
   p_before_group_id?: string | null;
 }
 
+export interface ReorderWorkoutItemsParams {
+  p_workout_group_id: string;
+  p_moved_item_id: string;
+  p_before_item_id?: string | null;
+}
+
 export interface AddWorkoutItemParams {
   p_workout_group_id: string;
   p_exercise_id: string;

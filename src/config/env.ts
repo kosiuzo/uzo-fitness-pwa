@@ -50,8 +50,14 @@ function isValidUrl(value: string): boolean {
 /**
  * Validates that a string is a valid Supabase anonymous key format
  * Supabase anon keys are JWT tokens that start with 'eyJ'
+ * In local development, accepts simplified 'sb_publishable_' format
  */
 function isValidSupabaseKey(value: string): boolean {
+  // Accept local development keys (sb_publishable_...)
+  if (value.startsWith('sb_publishable_') || value.startsWith('sb_secret_')) {
+    return value.length > 20;
+  }
+  // Production keys must be JWT format
   return value.startsWith('eyJ') && value.length > 100;
 }
 

@@ -58,8 +58,21 @@ export function NavigationBar() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 h-16 z-40">
-      <div className="flex items-center justify-around h-full">
+    <nav
+      className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40"
+      style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: '64px',
+        zIndex: 40,
+        backgroundColor: 'white',
+        borderTop: '1px solid #e5e7eb',
+        boxShadow: '0 -2px 8px rgba(0, 0, 0, 0.08)'
+      }}
+    >
+      <div className="flex items-center justify-around h-full" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', height: '100%' }}>
         {navItems.map((item) => (
           <NavLink
             key={item.to}
@@ -72,9 +85,19 @@ export function NavigationBar() {
                   : 'text-gray-600 hover:text-gray-900'
               }`
             }
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flex: 1,
+              height: '100%',
+              minWidth: 0,
+              textDecoration: 'none'
+            }}
           >
             {item.icon}
-            <span className="text-xs mt-1 font-medium truncate">
+            <span className="text-xs mt-1 font-medium truncate" style={{ fontSize: '0.75rem', marginTop: '0.25rem', fontWeight: 500 }}>
               {item.label}
             </span>
           </NavLink>

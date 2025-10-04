@@ -5,6 +5,7 @@ import { NetworkStatusBanner } from './components/shared'
 import { DashboardPage } from './pages/DashboardPage'
 import { WorkoutsPage } from './pages/WorkoutsPage'
 import { WorkoutDetailPage } from './pages/WorkoutDetailPage'
+import { WorkoutNewPage } from './pages/WorkoutNewPage'
 
 // Create query client for TanStack Query
 const queryClient = new QueryClient({
@@ -58,6 +59,10 @@ const router = createBrowserRouter([
       {
         path: 'workouts',
         element: <WorkoutsPage />,
+      },
+      {
+        path: 'workouts/new',
+        element: <WorkoutNewPage />,
       },
       {
         path: 'workouts/:workoutId',

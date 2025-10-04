@@ -1,17 +1,21 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AppLayout } from './components/layout'
 import { NetworkStatusBanner } from './components/shared'
+import { DashboardPage } from './pages/DashboardPage'
 
-// Placeholder page components - will be implemented in Phase 3+
-function DashboardPage() {
-  return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-      <p className="text-gray-600">Welcome to Uzo Fitness PWA</p>
-    </div>
-  )
-}
+// Create query client for TanStack Query
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 30 * 60 * 1000, // 30 minutes
+      retry: 1,
+    },
+  },
+})
 
+// Placeholder page components - will be implemented in future phases
 function WorkoutsPage() {
   return (
     <div className="p-4">
@@ -80,10 +84,10 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <NetworkStatusBanner />
       <RouterProvider router={router} />
-    </>
+    </QueryClientProvider>
   )
 }
 
